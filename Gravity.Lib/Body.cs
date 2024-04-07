@@ -82,8 +82,10 @@ namespace Gravity.Lib
         /// <summary>
         /// Sets the velocity to ensure stable orbit around parent
         /// </summary>
-        public void SetStableVelocity(Body parent)
+        public void InitBasedOnParent(Body parent, Vector2 distance)
         {
+            Position = parent.Position + distance;
+
             var unit = (Position - parent.Position) / (Position - parent.Position).Length();
             var orthogonal = new Vector2(unit.Y, -1 * unit.X);
             var magnitude = (float)Math.Sqrt(Constants.Gravity * (parent.Mass / 1000) / (Position - parent.Position).Length());

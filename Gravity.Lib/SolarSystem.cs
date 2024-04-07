@@ -17,6 +17,14 @@ namespace Gravity.Lib
         /// <summary>
         /// The current date
         /// </summary>
+        public DateTime StartDate
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// The current date
+        /// </summary>
         public DateTime Date
         {
             get;

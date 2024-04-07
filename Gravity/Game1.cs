@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 using System;
-using System.Globalization;
 using Numerics = System.Numerics;
 
 using Gravity.Lib;
@@ -93,33 +92,54 @@ namespace Gravity
                 BodyType = BodyType.Sun,
                 Name = "Sol",
                 Mass = (float)(1.9885 * Math.Pow(10, 33)),
-                Radius = 696000000,
-                Position = new Numerics.Vector2(0, 149597870000)
+                Radius = 696000000
+            };
+            var mercury = new RadialBody()
+            {
+                BodyType = BodyType.Planet,
+                Name = "Mercury",
+                Mass = (float)(3.302 * Math.Pow(10, 26)),
+                Radius = 2439700
+            };
+            var venus = new RadialBody()
+            {
+                BodyType = BodyType.Planet,
+                Name = "Venus",
+                Mass = (float)(4.868 * Math.Pow(10, 27)),
+                Radius = 6051800
             };
             var earth = new RadialBody()
             {
                 BodyType = BodyType.Planet,
                 Name = "Earth",
                 Mass = (float)(5.972 * Math.Pow(10, 27)),
-                Radius = 6371000,
-                Position = new Numerics.Vector2(0, 0)
+                Radius = 6371000
             };
             var luna = new RadialBody()
             {
                 BodyType = BodyType.Moon,
                 Name = "Luna",
                 Mass = (float)(7.35 * Math.Pow(10, 22)),
-                Radius = 1737400,
-                Position = new Numerics.Vector2(0, 385000600)
+                Radius = 1737400
             };
-            earth.SetStableVelocity(sol);
-            luna.SetStableVelocity(earth);
+
+            mercury.InitBasedOnParent(sol, 
+                new Numerics.Vector2(0, 57910000000));
+            venus.InitBasedOnParent(sol, 
+                new Numerics.Vector2(0, 108210000000));
+            earth.InitBasedOnParent(sol, 
+                new Numerics.Vector2(0, 149597870000));
+            luna.InitBasedOnParent(earth, 
+                new Numerics.Vector2(0, 385000600));
+
             SolarSystem = new SolarSystem()
             {
+                StartDate = new DateTime(2024, 4, 14),
                 Date = new DateTime(2024, 4, 14),
                 Bodies =
                 [
                     sol,
+                    venus,
                     earth,
                     luna
                 ]
@@ -276,25 +296,8 @@ namespace Gravity
                 return title + ": " + (referencePosition - position).ToVector2().Length() + " <" + angle + " " + arrow;
             }
 
-            static string getHijriDate(DateTime date)
-            {
-                // Create an instance of HijriCalendar
-                var hijriCalendar = new HijriCalendar();
-
-                // Convert Gregorian date to Hijri date
-                int hijriYear = hijriCalendar.GetYear(date);
-                int hijriMonth = hijriCalendar.GetMonth(date);
-                int hijriDay = hijriCalendar.GetDayOfMonth(date);
-
-                return hijriYear + "/" + hijriMonth + "/" + hijriDay;
-            }
-            static string getGregDate(DateTime date)
-            {
-                return date.Year + "/" + date.Month + "/" + date.Day;
-            }
-
             // Get position text
-            var positions = getGregDate(SolarSystem.Date) + "\n" + getHijriDate(SolarSystem.Date) + "\n";
+            var positions = "";
             {
                 var positionFactor = PositionFactor / Camera.Zoom;
                 positions += getPositionText("Camera", new Point(0, 0), new Point((int)(Camera.Position.X * positionFactor / 1000000), (int)(Camera.Position.Y * positionFactor / 1000000))) + "\n";
