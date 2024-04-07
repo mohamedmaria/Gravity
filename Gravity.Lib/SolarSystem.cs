@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+
+using System.ComponentModel;
+using System.Numerics;
 
 namespace Gravity.Lib
 {
@@ -21,10 +23,7 @@ namespace Gravity.Lib
             set;
         }
 
-        /// <summary>
-        /// Updates the acceleration/velocity/position of all bodies in the system
-        /// </summary>
-        public void UpdateBodies(float elapsedTime)
+        private void UpdateBodies(float elapsedTime)
         {
             // Update acceleration
             foreach (var body in Bodies)
@@ -59,6 +58,31 @@ namespace Gravity.Lib
                     body.Acceleration * elapsedTime +
                     body.Velocity;
             }
+        }
+        /// <summary>
+        /// Starts the position update routine
+        /// </summary>
+        public void StartUpdate(float timeFactor)
+        {
+            int elapsedTime = 1;
+
+            var bw = new BackgroundWorker();
+            bw.DoWork += (sender, e) =>
+            {
+                while(true)
+                {
+                    try 
+                    { 
+                        UpdateBodies(timeFactor * elapsedTime / 1000); 
+                    }
+                    catch 
+                    { 
+                    
+                    }
+                    Thread.Sleep(elapsedTime);
+                }
+            };
+            bw.RunWorkerAsync();
         }
 
         /// <summary>

@@ -76,9 +76,18 @@ namespace Gravity
             Graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+                        
             BodyTextures = [];
 
-            var sun = new RadialBody()
+            TimeFactor = 1000000;
+            MoonSizeFactor = 100;
+            PlanetSizeFactor = 200;
+            SunSizeFactor = 500;
+            PositionFactor = 5000;
+
+            Camera = new Camera();
+
+            var sol = new RadialBody()
             {
                 BodyType = BodyType.Sun,
                 Name = "Sol",
@@ -100,29 +109,20 @@ namespace Gravity
                 Name = "Luna",
                 Mass = (float)(7.35 * Math.Pow(10, 22)),
                 Radius = 1737400,
-                Position = new Numerics.Vector2(0, 385000600)
+                Position = new Numerics.Vector2(0, -385000600)
             };
-
-            earth.SetStableVelocity(sun);
+            earth.SetStableVelocity(sol);
             luna.SetStableVelocity(earth);
-
             SolarSystem = new SolarSystem()
             {
                 Bodies =
                 [
-                    sun,
+                    sol,
                     earth,
                     luna
                 ]
             };
-
-            Camera = new Camera();
-
-            TimeFactor = 1000000;
-            MoonSizeFactor = 250000;
-            PlanetSizeFactor = 250000;
-            SunSizeFactor = 5000000;
-            PositionFactor = 50000000;
+            SolarSystem.StartUpdate(TimeFactor);
         }
 
         protected override void Initialize()
@@ -183,8 +183,6 @@ namespace Gravity
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            SolarSystem.UpdateBodies((float)gameTime.ElapsedGameTime.TotalSeconds * TimeFactor);
-
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
                 Camera.Position = new Point(Camera.Position.X, Camera.Position.Y + Camera.MovementSpeed);
@@ -231,7 +229,7 @@ namespace Gravity
             var cameraPosition = Camera.Position;
             foreach (var body in SolarSystem.Bodies)
             {
-                if (body.Name == "Sol")
+                if (body.Name == "Earth")
                 {
                     var positionFactor = PositionFactor / Camera.Zoom;
                     var position = GetCenterPosition(body, positionFactor);
