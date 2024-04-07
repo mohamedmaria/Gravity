@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 using System;
+using System.Globalization;
 using Numerics = System.Numerics;
 
 using Gravity.Lib;
@@ -79,9 +80,9 @@ namespace Gravity
                         
             BodyTextures = [];
 
-            TimeFactor = 1000000;
+            TimeFactor = 1000;
             MoonSizeFactor = 100;
-            PlanetSizeFactor = 200;
+            PlanetSizeFactor = 150;
             SunSizeFactor = 500;
             PositionFactor = 5000;
 
@@ -109,12 +110,13 @@ namespace Gravity
                 Name = "Luna",
                 Mass = (float)(7.35 * Math.Pow(10, 22)),
                 Radius = 1737400,
-                Position = new Numerics.Vector2(0, -385000600)
+                Position = new Numerics.Vector2(0, 385000600)
             };
             earth.SetStableVelocity(sol);
             luna.SetStableVelocity(earth);
             SolarSystem = new SolarSystem()
             {
+                Date = new DateTime(2024, 4, 14),
                 Bodies =
                 [
                     sol,
@@ -226,25 +228,84 @@ namespace Gravity
                 return;
 
             // Get camera position relative to earth
-            var cameraPosition = Camera.Position;
+            var referencePosition = new Point(0, 0);
+            var referenceCameraPosition = new Point(0, 0);
             foreach (var body in SolarSystem.Bodies)
             {
                 if (body.Name == "Earth")
                 {
                     var positionFactor = PositionFactor / Camera.Zoom;
-                    var position = GetCenterPosition(body, positionFactor);
-                    cameraPosition = position - Camera.Position - new Point(Graphics.PreferredBackBufferWidth / 2, Graphics.PreferredBackBufferHeight / 2);
+
+                    referencePosition = GetCenterPosition(body, 1000000);
+                    referenceCameraPosition = GetCenterPosition(body, positionFactor);
                 }
             }
 
+            // Set camera position
+            var cameraPosition = referenceCameraPosition - Camera.Position - new Point(Graphics.PreferredBackBufferWidth / 2, Graphics.PreferredBackBufferHeight / 2);
+
+            static string getPositionText(string title, Point position, Point referencePosition)
+            {
+                var arrow = "";
+                var angle = Math.Round(Math.Atan2((referencePosition - position).Y, (referencePosition - position).X) * 180 / Math.PI, 2);
+                if (angle >= 0 && angle <= 45)
+                {
+                    arrow = "->";
+                }
+                else if (angle >= -45 && angle <= 0)
+                {
+                    arrow = "->";
+                }
+                else if (angle >= 135 && angle <= 180)
+                {
+                    arrow = "<-";
+                }
+                else if (angle >= -180 && angle <= -135)
+                {
+                    arrow = "<-";
+                }
+                else if (angle >= 45 && angle <= 135)
+                {
+                    arrow = "|";
+                }
+                else if (angle >= -135 && angle <= -45)
+                {
+                    arrow = "|";
+                }
+
+                return title + ": " + (referencePosition - position).ToVector2().Length() + " <" + angle + " " + arrow;
+            }
+
+            static string getHijriDate(DateTime date)
+            {
+                // Create an instance of HijriCalendar
+                var hijriCalendar = new HijriCalendar();
+
+                // Convert Gregorian date to Hijri date
+                int hijriYear = hijriCalendar.GetYear(date);
+                int hijriMonth = hijriCalendar.GetMonth(date);
+                int hijriDay = hijriCalendar.GetDayOfMonth(date);
+
+                return hijriYear + "/" + hijriMonth + "/" + hijriDay;
+            }
+            static string getGregDate(DateTime date)
+            {
+                return date.Year + "/" + date.Month + "/" + date.Day;
+            }
+
             // Get position text
-            var positions = "";
-            foreach (var body in SolarSystem.Bodies)
+            var positions = getGregDate(SolarSystem.Date) + "\n" + getHijriDate(SolarSystem.Date) + "\n";
             {
                 var positionFactor = PositionFactor / Camera.Zoom;
-                var position = GetCenterPosition(body, positionFactor);
-                var relativePosition = position - cameraPosition;
-                positions += body.Name + ": " + relativePosition.X + ", " + relativePosition.Y + "\n";
+                positions += getPositionText("Camera", new Point(0, 0), new Point((int)(Camera.Position.X * positionFactor / 1000000), (int)(Camera.Position.Y * positionFactor / 1000000))) + "\n";
+            }
+            foreach (var body in SolarSystem.Bodies)
+            {
+                if (body.Name != "Earth")
+                {
+                    var position = GetCenterPosition(body, 1000000);
+                    positions += getPositionText(body.Name, position, referencePosition) + "\n";
+                }
             }
 
             SpriteBatch.Begin();

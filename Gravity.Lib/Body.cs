@@ -63,9 +63,17 @@ namespace Gravity.Lib
             set;
         }
         /// <summary>
-        /// Velocity of the body m/s^2
+        /// Acceleration of the body m/s^2
         /// </summary>
         public Vector2 Acceleration
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// Jerk of the body m/s^3
+        /// </summary>
+        public Vector2 Jerk
         {
             get;
             set;
@@ -93,6 +101,7 @@ namespace Gravity.Lib
             Position = new Vector2(0, 0);
             Velocity = new Vector2(0, 0);
             Acceleration = new Vector2(0, 0);
+            Jerk = new Vector2(0, 0);
         }
     }
 }

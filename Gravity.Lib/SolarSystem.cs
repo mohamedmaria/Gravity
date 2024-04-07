@@ -15,6 +15,14 @@ namespace Gravity.Lib
     public class SolarSystem
     {
         /// <summary>
+        /// The current date
+        /// </summary>
+        public DateTime Date
+        {
+            get;
+            set;
+        }
+        /// <summary>
         /// List of bodies in the system
         /// </summary>
         public List<Body> Bodies
@@ -39,6 +47,8 @@ namespace Gravity.Lib
                         acceleration += new Vector2(unitVector.X * magnitude, unitVector.Y * magnitude);
                     }
                 }
+
+                body.Jerk = (acceleration - body.Acceleration) / elapsedTime;
                 body.Acceleration = acceleration;
             }
 
@@ -46,17 +56,19 @@ namespace Gravity.Lib
             foreach (var body in Bodies)
             {
                 body.Position =
-                    0.5f * body.Acceleration * ((float)Math.Pow(elapsedTime, 2)) +
-                    body.Velocity * elapsedTime +
-                    body.Position;
+                    (1.0f / 6.0f) * body.Jerk * ((float)Math.Pow(elapsedTime, 3)) +
+                    (1.0f / 2.0f) * body.Acceleration * ((float)Math.Pow(elapsedTime, 2)) +
+                    (1.0f / 1.0f) * body.Velocity * elapsedTime +
+                    (1.0f / 1.0f) * body.Position;
             }
 
             // Update velocity
             foreach (var body in Bodies)
             {
-                body.Velocity = 
-                    body.Acceleration * elapsedTime +
-                    body.Velocity;
+                body.Velocity =
+                    (1.0f / 2.0f) * body.Jerk * ((float)Math.Pow(elapsedTime, 2)) +
+                    (1.0f / 1.0f) * body.Acceleration * elapsedTime +
+                    (1.0f / 1.0f) * body.Velocity;
             }
         }
         /// <summary>
@@ -64,22 +76,24 @@ namespace Gravity.Lib
         /// </summary>
         public void StartUpdate(float timeFactor)
         {
-            int elapsedTime = 1;
-
             var bw = new BackgroundWorker();
             bw.DoWork += (sender, e) =>
             {
+                var previousTime = DateTime.Now;
                 while(true)
                 {
                     try 
-                    { 
-                        UpdateBodies(timeFactor * elapsedTime / 1000); 
+                    {
+                        var currentTime = DateTime.Now;
+                        Date = Date.AddSeconds((currentTime - previousTime).TotalMilliseconds * timeFactor);
+                        UpdateBodies(timeFactor);
+                        previousTime = currentTime;
                     }
                     catch 
                     { 
                     
                     }
-                    Thread.Sleep(elapsedTime);
+                    Thread.Sleep(1);
                 }
             };
             bw.RunWorkerAsync();
