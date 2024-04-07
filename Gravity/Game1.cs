@@ -139,6 +139,7 @@ namespace Gravity
                 Bodies =
                 [
                     sol,
+                    mercury,
                     venus,
                     earth,
                     luna
@@ -252,7 +253,7 @@ namespace Gravity
             var referenceCameraPosition = new Point(0, 0);
             foreach (var body in SolarSystem.Bodies)
             {
-                if (body.Name == "Earth")
+                if (body.Name == "Sol")
                 {
                     var positionFactor = PositionFactor / Camera.Zoom;
 
@@ -304,7 +305,7 @@ namespace Gravity
             }
             foreach (var body in SolarSystem.Bodies)
             {
-                if (body.Name != "Earth")
+                if (body.Name != "Sol")
                 {
                     var position = GetCenterPosition(body, 1000000);
                     positions += getPositionText(body.Name, position, referencePosition) + "\n";
@@ -335,6 +336,8 @@ namespace Gravity
                         new Rectangle(relativePosition, new Point(radius * 2, radius * 2)),
                         Color.Brown
                         );
+
+                    SpriteBatch.DrawString(MainFont, radialBody.Name, new Vector2(relativePosition.X, relativePosition.Y), Color.White);
                 }
             }
 
