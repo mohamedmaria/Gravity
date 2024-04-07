@@ -61,20 +61,30 @@ namespace Gravity
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            SolarSystem = new SolarSystem();
-            SolarSystem.Bodies.Add(new RadialBody() { 
-                Name = "Earth", 
-                Mass = (float)(5.972 * Math.Pow(10, 27)), 
-                Radius = 6371000, 
-                Position = new Numerics.Vector2(0, 0) 
-            });
-            SolarSystem.Bodies.Add(new RadialBody() { 
-                Name = "Luna", 
-                Mass = (float)(7.35 * Math.Pow(10, 22)), 
+            var earth = new RadialBody()
+            {
+                Name = "Earth",
+                Mass = (float)(5.972 * Math.Pow(10, 27)),
+                Radius = 6371000,
+                Position = new Numerics.Vector2(0, 0)
+            };
+            var luna = new RadialBody()
+            {
+                Name = "Luna",
+                Mass = (float)(7.35 * Math.Pow(10, 22)),
                 Radius = 1737400,
-                Position = new Numerics.Vector2(0, 385000600),
-                Velocity = new Numerics.Vector2(1017, 0)
-            });
+                Position = new Numerics.Vector2(0, 385000600)
+            };
+            luna.SetStableVelocity(earth);
+
+            SolarSystem = new SolarSystem()
+            {
+                Bodies = new List<Body>()
+                {
+                    earth,
+                    luna
+                }
+            };
 
             TimeFactor = 1000000;
             SizeFactor = 250000;
@@ -110,21 +120,23 @@ namespace Gravity
 
             SolarSystem.UpdateBodies((float)gameTime.ElapsedGameTime.TotalSeconds * TimeFactor);
 
+            int movement = 10;
+
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
-                CameraPosition = new Point(CameraPosition.X, CameraPosition.Y - 1);
+                CameraPosition = new Point(CameraPosition.X, CameraPosition.Y + movement);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.S))
             {
-                CameraPosition = new Point(CameraPosition.X, CameraPosition.Y + 1);
+                CameraPosition = new Point(CameraPosition.X, CameraPosition.Y - movement);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.A))
             {
-                CameraPosition = new Point(CameraPosition.X - 1, CameraPosition.Y);
+                CameraPosition = new Point(CameraPosition.X + movement, CameraPosition.Y);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.D))
             {
-                CameraPosition = new Point(CameraPosition.X + 1, CameraPosition.Y);
+                CameraPosition = new Point(CameraPosition.X - movement, CameraPosition.Y);
             }
 
             base.Update(gameTime);
@@ -173,41 +185,47 @@ namespace Gravity
             {
                 return (int)(body.Radius / sizeFactor);
             }
-            static Point getPosition(RadialBody body, float sizeFactor, float positionFactor)
+            static Point getCenterPosition(Body body, float positionFactor)
+            {
+                return new Point((int)(body.Position.X / positionFactor), (int)(body.Position.Y / positionFactor));
+            }
+            static Point getTopLeftPosition(RadialBody body, float sizeFactor, float positionFactor)
             {
                 var radius = getRadius(body, sizeFactor);
-                return new Point((int)(body.Position.X / positionFactor) - radius, (int)(body.Position.Y / positionFactor) - radius);
+                return getCenterPosition(body, positionFactor) - new Point(radius, radius);
             }
-
-            SpriteBatch.Begin();
 
             // Get camera position relative to earth
             var cameraPosition = CameraPosition;
             foreach (var body in SolarSystem.Bodies)
             {
-                var radialBody = (body as RadialBody);
-                if (radialBody != null)
+                if (body.Name == "Earth")
                 {
-                    if (radialBody.Name == "Earth")
-                    {
-                        var position = getPosition(radialBody, SizeFactor, PositionFactor);
-                        cameraPosition = CameraPosition + position;
-                    }
+                    var position = getCenterPosition(body, PositionFactor);
+                    cameraPosition = position - CameraPosition - new Point(Graphics.PreferredBackBufferWidth / 2, Graphics.PreferredBackBufferHeight / 2);
                 }
             }
 
-            // Draw all bodies and text with their relative positions
+            // Get position text
             var positions = "";
+            foreach (var body in SolarSystem.Bodies)
+            {
+                var position = getCenterPosition(body, PositionFactor);
+                var relativePosition = position - CameraPosition;
+                positions += body.Name + ": " + relativePosition.X + ", " + relativePosition.Y + "\n";
+            }
+
+            SpriteBatch.Begin();
+
+            // Draw all bodies
             foreach (var body in SolarSystem.Bodies)
             {
                 var radialBody = (body as RadialBody);
                 if (radialBody != null)
                 {
                     var radius = getRadius(radialBody, SizeFactor);
-                    var position = getPosition(radialBody, SizeFactor, PositionFactor);
+                    var position = getTopLeftPosition(radialBody, SizeFactor, PositionFactor);
                     var relativePosition = position - cameraPosition;
-
-                    positions += radialBody.Name + ": " + relativePosition.X + ", " + relativePosition.Y + "\n";
 
                     SpriteBatch.Draw(
                         createCircleText(radius * 2),
@@ -216,6 +234,8 @@ namespace Gravity
                         );
                 }
             }
+
+            // Draw position text
             SpriteBatch.DrawString(MainFont, positions, new Vector2(10, 10), Color.White);
 
             SpriteBatch.End();

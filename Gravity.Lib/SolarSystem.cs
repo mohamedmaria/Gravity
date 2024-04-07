@@ -26,8 +26,6 @@ namespace Gravity.Lib
         /// </summary>
         public void UpdateBodies(float elapsedTime)
         {
-            var constG = (float)(6.674 * Math.Pow(10, -11));
-
             // Update acceleration
             foreach (var body in Bodies)
             {
@@ -37,7 +35,7 @@ namespace Gravity.Lib
                     if (body != otherBody)
                     {
                         var unitVector = (otherBody.Position - body.Position) / (otherBody.Position - body.Position).Length();
-                        var magnitude = (constG * (otherBody.Mass / 1000) / (otherBody.Position - body.Position).LengthSquared());
+                        var magnitude = (Constants.Gravity * (otherBody.Mass / 1000) / (otherBody.Position - body.Position).LengthSquared());
 
                         acceleration += new Vector2(unitVector.X * magnitude, unitVector.Y * magnitude);
                     }
