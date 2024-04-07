@@ -8,6 +8,13 @@ using System.Numerics;
 
 namespace Gravity.Lib
 {
+    public enum BodyType
+    {
+        Planet,
+        Moon,
+        Sun
+    }
+
     /// <summary>
     /// A body
     /// </summary>
@@ -25,6 +32,15 @@ namespace Gravity.Lib
         /// Mass of the body (g)
         /// </summary>
         public float Mass
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// The type of body
+        /// </summary>
+        public BodyType BodyType
         {
             get;
             set;

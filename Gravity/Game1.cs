@@ -27,6 +27,11 @@ namespace Gravity
             get;
             set;
         }
+        public Dictionary<Body, Texture2D> BodyTextures
+        {
+            get;
+            set;
+        }
 
         private float TimeFactor
         {
@@ -38,7 +43,17 @@ namespace Gravity
             get;
             set;
         }
-        private float SizeFactor
+        private float MoonSizeFactor
+        {
+            get;
+            set;
+        }
+        private float PlanetSizeFactor
+        {
+            get;
+            set;
+        }
+        private float SunSizeFactor
         {
             get;
             set;
@@ -49,20 +64,31 @@ namespace Gravity
             get;
             set;
         }
-        private Point CameraPosition
+        private Camera Camera
         {
             get;
             set;
         }
+        private int previousMouseWheel = int.MaxValue;
 
         public Game1()
         {
             Graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            BodyTextures = [];
 
+            var sun = new RadialBody()
+            {
+                BodyType = BodyType.Sun,
+                Name = "Sol",
+                Mass = (float)(1.9885 * Math.Pow(10, 33)),
+                Radius = 696000000,
+                Position = new Numerics.Vector2(0, 149597870000)
+            };
             var earth = new RadialBody()
             {
+                BodyType = BodyType.Planet,
                 Name = "Earth",
                 Mass = (float)(5.972 * Math.Pow(10, 27)),
                 Radius = 6371000,
@@ -70,26 +96,33 @@ namespace Gravity
             };
             var luna = new RadialBody()
             {
+                BodyType = BodyType.Moon,
                 Name = "Luna",
                 Mass = (float)(7.35 * Math.Pow(10, 22)),
                 Radius = 1737400,
                 Position = new Numerics.Vector2(0, 385000600)
             };
+
+            earth.SetStableVelocity(sun);
             luna.SetStableVelocity(earth);
 
             SolarSystem = new SolarSystem()
             {
-                Bodies = new List<Body>()
-                {
+                Bodies =
+                [
+                    sun,
                     earth,
                     luna
-                }
+                ]
             };
 
+            Camera = new Camera();
+
             TimeFactor = 1000000;
-            SizeFactor = 250000;
-            PositionFactor = 2500000;
-            CameraPosition = new Point(0, 0);
+            MoonSizeFactor = 250000;
+            PlanetSizeFactor = 250000;
+            SunSizeFactor = 5000000;
+            PositionFactor = 50000000;
         }
 
         protected override void Initialize()
@@ -111,39 +144,6 @@ namespace Gravity
             MainFont = Content.Load<SpriteFont>("File");
 
             // Load textures
-        }
-
-        protected override void Update(GameTime gameTime)
-        {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            SolarSystem.UpdateBodies((float)gameTime.ElapsedGameTime.TotalSeconds * TimeFactor);
-
-            int movement = 10;
-
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                CameraPosition = new Point(CameraPosition.X, CameraPosition.Y + movement);
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
-            {
-                CameraPosition = new Point(CameraPosition.X, CameraPosition.Y - movement);
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
-            {
-                CameraPosition = new Point(CameraPosition.X + movement, CameraPosition.Y);
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.D))
-            {
-                CameraPosition = new Point(CameraPosition.X - movement, CameraPosition.Y);
-            }
-
-            base.Update(gameTime);
-        }
-
-        protected override void Draw(GameTime gameTime)
-        {
             Texture2D createCircleText(int diameter)
             {
                 var texture = new Texture2D(GraphicsDevice, diameter, diameter);
@@ -172,7 +172,53 @@ namespace Gravity
                 texture.SetData(colorData);
                 return texture;
             }
+            foreach (var body in SolarSystem.Bodies)
+            {
+                BodyTextures[body] = createCircleText(1000);
+            }
+        }
 
+        protected override void Update(GameTime gameTime)
+        {
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
+
+            SolarSystem.UpdateBodies((float)gameTime.ElapsedGameTime.TotalSeconds * TimeFactor);
+
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            {
+                Camera.Position = new Point(Camera.Position.X, Camera.Position.Y + Camera.MovementSpeed);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.S))
+            {
+                Camera.Position = new Point(Camera.Position.X, Camera.Position.Y - Camera.MovementSpeed);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            {
+                Camera.Position = new Point(Camera.Position.X + Camera.MovementSpeed, Camera.Position.Y);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.D))
+            {
+                Camera.Position = new Point(Camera.Position.X - Camera.MovementSpeed, Camera.Position.Y);
+            }
+
+            // Mouse wheel zoom
+            {
+                var mouseState = Mouse.GetState();
+                if (previousMouseWheel == int.MaxValue)
+                    previousMouseWheel = mouseState.ScrollWheelValue;
+                if (mouseState.ScrollWheelValue > previousMouseWheel)
+                    Camera.Zoom *= Camera.ZoomSpeed;
+                if (mouseState.ScrollWheelValue < previousMouseWheel)
+                    Camera.Zoom /= Camera.ZoomSpeed;
+                previousMouseWheel = mouseState.ScrollWheelValue;
+            }
+
+            base.Update(gameTime);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
@@ -181,28 +227,15 @@ namespace Gravity
             if (MainFont == null)
                 return;
 
-            static int getRadius(RadialBody body, float sizeFactor)
-            {
-                return (int)(body.Radius / sizeFactor);
-            }
-            static Point getCenterPosition(Body body, float positionFactor)
-            {
-                return new Point((int)(body.Position.X / positionFactor), (int)(body.Position.Y / positionFactor));
-            }
-            static Point getTopLeftPosition(RadialBody body, float sizeFactor, float positionFactor)
-            {
-                var radius = getRadius(body, sizeFactor);
-                return getCenterPosition(body, positionFactor) - new Point(radius, radius);
-            }
-
             // Get camera position relative to earth
-            var cameraPosition = CameraPosition;
+            var cameraPosition = Camera.Position;
             foreach (var body in SolarSystem.Bodies)
             {
-                if (body.Name == "Earth")
+                if (body.Name == "Sol")
                 {
-                    var position = getCenterPosition(body, PositionFactor);
-                    cameraPosition = position - CameraPosition - new Point(Graphics.PreferredBackBufferWidth / 2, Graphics.PreferredBackBufferHeight / 2);
+                    var positionFactor = PositionFactor / Camera.Zoom;
+                    var position = GetCenterPosition(body, positionFactor);
+                    cameraPosition = position - Camera.Position - new Point(Graphics.PreferredBackBufferWidth / 2, Graphics.PreferredBackBufferHeight / 2);
                 }
             }
 
@@ -210,8 +243,9 @@ namespace Gravity
             var positions = "";
             foreach (var body in SolarSystem.Bodies)
             {
-                var position = getCenterPosition(body, PositionFactor);
-                var relativePosition = position - CameraPosition;
+                var positionFactor = PositionFactor / Camera.Zoom;
+                var position = GetCenterPosition(body, positionFactor);
+                var relativePosition = position - cameraPosition;
                 positions += body.Name + ": " + relativePosition.X + ", " + relativePosition.Y + "\n";
             }
 
@@ -223,12 +257,19 @@ namespace Gravity
                 var radialBody = (body as RadialBody);
                 if (radialBody != null)
                 {
-                    var radius = getRadius(radialBody, SizeFactor);
-                    var position = getTopLeftPosition(radialBody, SizeFactor, PositionFactor);
-                    var relativePosition = position - cameraPosition;
+                    var sizeFactor = (
+                        radialBody.BodyType == BodyType.Sun ? SunSizeFactor : 
+                        radialBody.BodyType == BodyType.Planet ? PlanetSizeFactor :
+                        MoonSizeFactor                        
+                        ) / Camera.Zoom;
+                    var positionFactor = PositionFactor / Camera.Zoom;
+
+                    var radius = GetRadius(radialBody, sizeFactor);
+                    var position = GetTopLeftPosition(radialBody, sizeFactor, positionFactor);
+                    var relativePosition = (position - cameraPosition);
 
                     SpriteBatch.Draw(
-                        createCircleText(radius * 2),
+                        BodyTextures[body],
                         new Rectangle(relativePosition, new Point(radius * 2, radius * 2)),
                         Color.Brown
                         );
@@ -242,6 +283,24 @@ namespace Gravity
 
 
             base.Draw(gameTime);
+        }
+
+        // Helpers
+        static int GetRadius(RadialBody? body, float sizeFactor)
+        {
+            if (body == null)
+                return 0;
+
+            return (int)(body.Radius / sizeFactor);
+        }
+        static Point GetCenterPosition(Body body, float positionFactor)
+        {
+            return new Point((int)(body.Position.X / positionFactor), (int)(body.Position.Y / positionFactor));
+        }
+        static Point GetTopLeftPosition(RadialBody body, float sizeFactor, float positionFactor)
+        {
+            var radius = GetRadius(body, sizeFactor);
+            return GetCenterPosition(body, positionFactor) - new Point(radius, radius);
         }
     }
 }
