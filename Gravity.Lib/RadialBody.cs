@@ -40,9 +40,9 @@ namespace Gravity.Lib
         /// <summary>
         /// Constructor
         /// </summary>
-        public RadialBody(BodyType bodyType, string name, float mass, float radius, Body parent, Vector2 parentOrbitDistance) : this(bodyType, name, mass, radius)
+        public RadialBody(BodyType bodyType, string name, float mass, float radius, Body parent, float orbitLength, float orbitDegrees) : this(bodyType, name, mass, radius)
         {
-            InitBasedOnParent(parent, parentOrbitDistance);
+            InitBasedOnParent(parent, orbitLength, orbitDegrees);
         }
     }
 }

@@ -100,7 +100,8 @@ namespace Gravity
                 (float)(3.302 * Math.Pow(10, 26)),
                 2439700,
                 sol,
-                new Numerics.Vector2(0, 57910000000)
+                57910000000,
+                0
             );
             var venus = new RadialBody(
                 BodyType.Planet,
@@ -108,7 +109,8 @@ namespace Gravity
                 (float)(4.868 * Math.Pow(10, 27)),
                 6051800,
                 sol,
-                new Numerics.Vector2(0, 108210000000)
+                108210000000,
+                0
             );
             var earth = new RadialBody(
                 BodyType.Planet,
@@ -116,7 +118,8 @@ namespace Gravity
                 (float)(5.972 * Math.Pow(10, 27)),
                 6371000,
                 sol,
-                new Numerics.Vector2(0, 149597870000)
+                149597870000,
+                0
             );
             var luna = new RadialBody(
                 BodyType.Moon,
@@ -124,7 +127,8 @@ namespace Gravity
                 (float)(7.35 * Math.Pow(10, 22)),
                 1737400,
                 earth,
-                new Numerics.Vector2(0, 385000600)
+                385000600,
+                0
             );
             var mars = new RadialBody(
                 BodyType.Planet,
@@ -132,7 +136,8 @@ namespace Gravity
                 (float)(6.4191 * Math.Pow(10, 26)),
                 3396200,
                 sol,
-                new Numerics.Vector2(0, 227940000000)
+                227940000000,
+                0
             );
             var jupiter = new RadialBody(
                 BodyType.Planet,
@@ -140,7 +145,8 @@ namespace Gravity
                 (float)(1.8987 * Math.Pow(10, 30)),
                 71492000,
                 sol,
-                new Numerics.Vector2(0, 778410000000)
+                778410000000,
+                0
             );
             var saturn = new RadialBody(
                 BodyType.Planet,
@@ -148,7 +154,8 @@ namespace Gravity
                 (float)(5.6851 * Math.Pow(10, 29)),
                 60268000,
                 sol,
-                new Numerics.Vector2(0, 1430000000000)
+                1430000000000,
+                0
             );
             var uranus = new RadialBody(
                 BodyType.Planet,
@@ -156,7 +163,8 @@ namespace Gravity
                 (float)(8.6849 * Math.Pow(10, 28)),
                 25559000,
                 sol,
-                new Numerics.Vector2(0, 2870000000000)
+                2870000000000,
+                0
             );
             var neptune = new RadialBody(
                 BodyType.Planet,
@@ -164,7 +172,8 @@ namespace Gravity
                 (float)(1.0244 * Math.Pow(10, 29)),
                 24764000,
                 sol,
-                new Numerics.Vector2(0, 4500000000000)
+                4500000000000,
+                0
             );
 
             Bodies = new BodyCollection()
