@@ -249,11 +249,12 @@ namespace Gravity
                 return;
 
             // Get camera position relative to earth
+            var referenceBodyName = "Sol";
             var referencePosition = new Point(0, 0);
             var referenceCameraPosition = new Point(0, 0);
             foreach (var body in SolarSystem.Bodies)
             {
-                if (body.Name == "Sol")
+                if (body.Name == referenceBodyName)
                 {
                     var positionFactor = PositionFactor / Camera.Zoom;
 
@@ -271,27 +272,27 @@ namespace Gravity
                 var angle = Math.Round(Math.Atan2((referencePosition - position).Y, (referencePosition - position).X) * 180 / Math.PI, 2);
                 if (angle >= 0 && angle <= 45)
                 {
-                    arrow = "->";
+                    arrow = "=>";
                 }
                 else if (angle >= -45 && angle <= 0)
                 {
-                    arrow = "->";
+                    arrow = "=>";
                 }
                 else if (angle >= 135 && angle <= 180)
                 {
-                    arrow = "<-";
+                    arrow = "<=";
                 }
                 else if (angle >= -180 && angle <= -135)
                 {
-                    arrow = "<-";
+                    arrow = "<=";
                 }
                 else if (angle >= 45 && angle <= 135)
                 {
-                    arrow = "|";
+                    arrow = "A";
                 }
                 else if (angle >= -135 && angle <= -45)
                 {
-                    arrow = "|";
+                    arrow = "V";
                 }
 
                 return title + ": " + (referencePosition - position).ToVector2().Length() + " <" + angle + " " + arrow;
@@ -305,7 +306,7 @@ namespace Gravity
             }
             foreach (var body in SolarSystem.Bodies)
             {
-                if (body.Name != "Sol")
+                if (body.Name != referenceBodyName)
                 {
                     var position = GetCenterPosition(body, 1000000);
                     positions += getPositionText(body.Name, position, referencePosition) + "\n";
