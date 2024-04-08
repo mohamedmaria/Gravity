@@ -12,7 +12,7 @@ namespace Gravity.Lib
     /// <summary>
     /// The system of bodies
     /// </summary>
-    public class SolarSystem
+    public class BodyCollection
     {
         /// <summary>
         /// The current date
@@ -110,7 +110,7 @@ namespace Gravity.Lib
         /// <summary>
         /// Constructor
         /// </summary>
-        public SolarSystem()
+        public BodyCollection()
         {
             Bodies = [];
         }

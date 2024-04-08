@@ -59,7 +59,7 @@ namespace Gravity
             set;
         }
 
-        private SolarSystem SolarSystem
+        private BodyCollection Bodies
         {
             get;
             set;
@@ -132,7 +132,7 @@ namespace Gravity
             luna.InitBasedOnParent(earth, 
                 new Numerics.Vector2(0, 385000600));
 
-            SolarSystem = new SolarSystem()
+            Bodies = new BodyCollection()
             {
                 StartDate = new DateTime(2024, 4, 14),
                 Date = new DateTime(2024, 4, 14),
@@ -145,7 +145,7 @@ namespace Gravity
                     luna
                 ]
             };
-            SolarSystem.StartUpdate(TimeFactor);
+            Bodies.StartUpdate(TimeFactor);
         }
 
         protected override void Initialize()
@@ -195,7 +195,7 @@ namespace Gravity
                 texture.SetData(colorData);
                 return texture;
             }
-            foreach (var body in SolarSystem.Bodies)
+            foreach (var body in Bodies.Bodies)
             {
                 BodyTextures[body] = createCircleText(1000);
             }
@@ -252,7 +252,7 @@ namespace Gravity
             var referenceBodyName = "Sol";
             var referencePosition = new Point(0, 0);
             var referenceCameraPosition = new Point(0, 0);
-            foreach (var body in SolarSystem.Bodies)
+            foreach (var body in Bodies.Bodies)
             {
                 if (body.Name == referenceBodyName)
                 {
@@ -304,7 +304,7 @@ namespace Gravity
                 var positionFactor = PositionFactor / Camera.Zoom;
                 positions += getPositionText("Camera", new Point(0, 0), new Point((int)(Camera.Position.X * positionFactor / 1000000), (int)(Camera.Position.Y * positionFactor / 1000000))) + "\n";
             }
-            foreach (var body in SolarSystem.Bodies)
+            foreach (var body in Bodies.Bodies)
             {
                 if (body.Name != referenceBodyName)
                 {
@@ -316,7 +316,7 @@ namespace Gravity
             SpriteBatch.Begin();
 
             // Draw all bodies
-            foreach (var body in SolarSystem.Bodies)
+            foreach (var body in Bodies.Bodies)
             {
                 var radialBody = (body as RadialBody);
                 if (radialBody != null)
