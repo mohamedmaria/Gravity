@@ -69,6 +69,7 @@ namespace Gravity
             get;
             set;
         }
+        private string Selection = "Sol";
         private int previousMouseWheel = int.MaxValue;
 
         public Game1()
@@ -76,13 +77,13 @@ namespace Gravity
             Graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-                        
+
             BodyTextures = [];
 
             TimeFactor = 1000;
-            MoonSizeFactor = 100;
+            MoonSizeFactor = 150;
             PlanetSizeFactor = 150;
-            SunSizeFactor = 500;
+            SunSizeFactor = 150;
             PositionFactor = 5000;
 
             Camera = new Camera();
@@ -133,6 +134,38 @@ namespace Gravity
                 sol,
                 new Numerics.Vector2(0, 227940000000)
             );
+            var jupiter = new RadialBody(
+                BodyType.Planet,
+                "Jupiter",
+                (float)(1.8987 * Math.Pow(10, 30)),
+                71492000,
+                sol,
+                new Numerics.Vector2(0, 778410000000)
+            );
+            var saturn = new RadialBody(
+                BodyType.Planet,
+                "Saturn",
+                (float)(5.6851 * Math.Pow(10, 29)),
+                60268000,
+                sol,
+                new Numerics.Vector2(0, 1430000000000)
+            );
+            var uranus = new RadialBody(
+                BodyType.Planet,
+                "Uranus",
+                (float)(8.6849 * Math.Pow(10, 28)),
+                25559000,
+                sol,
+                new Numerics.Vector2(0, 2870000000000)
+            );
+            var neptune = new RadialBody(
+                BodyType.Planet,
+                "Neptune",
+                (float)(1.0244 * Math.Pow(10, 29)),
+                24764000,
+                sol,
+                new Numerics.Vector2(0, 4500000000000)
+            );
 
             Bodies = new BodyCollection()
             {
@@ -144,7 +177,12 @@ namespace Gravity
                     mercury,
                     venus,
                     earth,
-                    luna
+                    luna,
+                    mars,
+                    jupiter,
+                    saturn,
+                    uranus,
+                    neptune
                 ]
             };
             Bodies.StartUpdate(TimeFactor);
@@ -225,6 +263,52 @@ namespace Gravity
                 Camera.Position = new Point(Camera.Position.X - Camera.MovementSpeed, Camera.Position.Y);
             }
 
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad0))
+            {
+                Selection = "Sol";
+                Camera.Position = new Point(0, 0);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.NumPad1))
+            {
+                Selection = "Mercury";
+                Camera.Position = new Point(0, 0);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.NumPad2))
+            {
+                Selection = "Venus";
+                Camera.Position = new Point(0, 0);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.NumPad3))
+            {
+                Selection = "Earth";
+                Camera.Position = new Point(0, 0);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.NumPad4))
+            {
+                Selection = "Mars";
+                Camera.Position = new Point(0, 0);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.NumPad5))
+            {
+                Selection = "Jupiter";
+                Camera.Position = new Point(0, 0);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.NumPad6))
+            {
+                Selection = "Saturn";
+                Camera.Position = new Point(0, 0);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.NumPad7))
+            {
+                Selection = "Uranus";
+                Camera.Position = new Point(0, 0);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.NumPad8))
+            {
+                Selection = "Neptune";
+                Camera.Position = new Point(0, 0);
+            }
+
             // Mouse wheel zoom
             {
                 var mouseState = Mouse.GetState();
@@ -251,7 +335,7 @@ namespace Gravity
                 return;
 
             // Get camera position relative to earth
-            var referenceBodyName = "Sol";
+            var referenceBodyName = Selection;
             var referencePosition = new Point(0, 0);
             var referenceCameraPosition = new Point(0, 0);
             foreach (var body in Bodies.Bodies)
@@ -324,9 +408,9 @@ namespace Gravity
                 if (radialBody != null)
                 {
                     var sizeFactor = (
-                        radialBody.BodyType == BodyType.Sun ? SunSizeFactor : 
+                        radialBody.BodyType == BodyType.Sun ? SunSizeFactor :
                         radialBody.BodyType == BodyType.Planet ? PlanetSizeFactor :
-                        MoonSizeFactor                        
+                        MoonSizeFactor
                         ) / Camera.Zoom;
                     var positionFactor = PositionFactor / Camera.Zoom;
 
