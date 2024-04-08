@@ -87,50 +87,52 @@ namespace Gravity
 
             Camera = new Camera();
 
-            var sol = new RadialBody()
-            {
-                BodyType = BodyType.Sun,
-                Name = "Sol",
-                Mass = (float)(1.9885 * Math.Pow(10, 33)),
-                Radius = 696000000
-            };
-            var mercury = new RadialBody()
-            {
-                BodyType = BodyType.Planet,
-                Name = "Mercury",
-                Mass = (float)(3.302 * Math.Pow(10, 26)),
-                Radius = 2439700
-            };
-            var venus = new RadialBody()
-            {
-                BodyType = BodyType.Planet,
-                Name = "Venus",
-                Mass = (float)(4.868 * Math.Pow(10, 27)),
-                Radius = 6051800
-            };
-            var earth = new RadialBody()
-            {
-                BodyType = BodyType.Planet,
-                Name = "Earth",
-                Mass = (float)(5.972 * Math.Pow(10, 27)),
-                Radius = 6371000
-            };
-            var luna = new RadialBody()
-            {
-                BodyType = BodyType.Moon,
-                Name = "Luna",
-                Mass = (float)(7.35 * Math.Pow(10, 22)),
-                Radius = 1737400
-            };
-
-            mercury.InitBasedOnParent(sol, 
-                new Numerics.Vector2(0, 57910000000));
-            venus.InitBasedOnParent(sol, 
-                new Numerics.Vector2(0, 108210000000));
-            earth.InitBasedOnParent(sol, 
-                new Numerics.Vector2(0, 149597870000));
-            luna.InitBasedOnParent(earth, 
-                new Numerics.Vector2(0, 385000600));
+            var sol = new RadialBody(
+                BodyType.Sun,
+                "Sol",
+                (float)(1.9885 * Math.Pow(10, 33)),
+                696000000
+                );
+            var mercury = new RadialBody(
+                BodyType.Planet,
+                "Mercury",
+                (float)(3.302 * Math.Pow(10, 26)),
+                2439700,
+                sol,
+                new Numerics.Vector2(0, 57910000000)
+            );
+            var venus = new RadialBody(
+                BodyType.Planet,
+                "Venus",
+                (float)(4.868 * Math.Pow(10, 27)),
+                6051800,
+                sol,
+                new Numerics.Vector2(0, 108210000000)
+            );
+            var earth = new RadialBody(
+                BodyType.Planet,
+                "Earth",
+                (float)(5.972 * Math.Pow(10, 27)),
+                6371000,
+                sol,
+                new Numerics.Vector2(0, 149597870000)
+            );
+            var luna = new RadialBody(
+                BodyType.Moon,
+                "Luna",
+                (float)(7.35 * Math.Pow(10, 22)),
+                1737400,
+                earth,
+                new Numerics.Vector2(0, 385000600)
+            );
+            var mars = new RadialBody(
+                BodyType.Planet,
+                "Mars",
+                (float)(6.4191 * Math.Pow(10, 26)),
+                3396200,
+                sol,
+                new Numerics.Vector2(0, 227940000000)
+            );
 
             Bodies = new BodyCollection()
             {

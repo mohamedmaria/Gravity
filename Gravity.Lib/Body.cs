@@ -82,7 +82,7 @@ namespace Gravity.Lib
         /// <summary>
         /// Sets the velocity to ensure stable orbit around parent
         /// </summary>
-        public void InitBasedOnParent(Body parent, Vector2 distance)
+        internal void InitBasedOnParent(Body parent, Vector2 distance)
         {
             Position = parent.Position + distance;
 

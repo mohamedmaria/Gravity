@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Numerics;
+
 namespace Gravity.Lib
 {
     /// <summary>
@@ -23,9 +25,24 @@ namespace Gravity.Lib
         /// <summary>
         /// Constructor
         /// </summary>
-        public RadialBody()
+        public RadialBody(BodyType bodyType, string name, float mass, float radius)
         {
-            Radius = 0;
+            BodyType = bodyType;
+            Name = name;
+            Mass = mass;
+            Radius = radius;
+
+            Position = new Vector2(0, 0);
+            Velocity = new Vector2(0, 0);
+            Acceleration = new Vector2(0, 0);
+            Jerk = new Vector2(0, 0);
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public RadialBody(BodyType bodyType, string name, float mass, float radius, Body parent, Vector2 parentOrbitDistance) : this(bodyType, name, mass, radius)
+        {
+            InitBasedOnParent(parent, parentOrbitDistance);
         }
     }
 }
