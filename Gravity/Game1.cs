@@ -64,6 +64,11 @@ namespace Gravity
             get;
             set;
         }
+        private Vector2[] Stars
+        {
+            get;
+            set;
+        }
         private Camera Camera
         {
             get;
@@ -71,7 +76,7 @@ namespace Gravity
         }
         private string Selection = "Sol";
         private int previousMouseWheel = int.MaxValue;
-
+        
         public Game1()
         {
             Graphics = new GraphicsDeviceManager(this);
@@ -205,6 +210,9 @@ namespace Gravity
                 ]
             };
             Bodies.StartUpdate(TimeFactor);
+
+            var starCount = 500;
+            Stars = new Vector2[starCount];           
         }
 
         protected override void Initialize()
@@ -214,6 +222,12 @@ namespace Gravity
             Graphics.PreferredBackBufferWidth = 1920;
             Graphics.PreferredBackBufferHeight = 1080;
             Graphics.ApplyChanges();
+
+            var rand = new Random(12345);
+            for (int i = 0; i < Stars.Length; i++)
+            {
+                Stars[i] = new Vector2(rand.Next(0, Graphics.PreferredBackBufferWidth), rand.Next(0, Graphics.PreferredBackBufferHeight));
+            }
 
             base.Initialize();
         }
@@ -360,7 +374,7 @@ namespace Gravity
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(new Color(5, 5, 20));
 
             // TODO: Add your drawing code here
             if (SpriteBatch == null)
@@ -434,6 +448,16 @@ namespace Gravity
             }
 
             SpriteBatch.Begin();
+
+            // Draw starfield
+            foreach (var star in Stars)
+            {
+                SpriteBatch.Draw(
+                    BodyTextures[Bodies.Bodies[0]], // Use any small texture
+                    new Rectangle((int)star.X, (int)star.Y, 2, 2),
+                    Color.White * 0.8f
+                    );
+            }
 
             // Draw all bodies
             foreach (var body in Bodies.Bodies)
