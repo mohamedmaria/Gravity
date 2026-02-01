@@ -76,6 +76,16 @@ namespace Gravity
         }
         private string Selection = "Sol";
         private int previousMouseWheel = int.MaxValue;
+        private float targetZoom = 1f / 100000;
+        private float zoomTransitionSpeed = 2; // Time in seconds to complete zoom transition
+        private float zoomTransitionElapsed = 0f;
+        private float zoomStart = 1f / 100000;
+        private bool zoomTransitionActive = false;
+        private Point targetPosition = new Point(0, 0);
+        private float positionTransitionSpeed = 0.5f; // Time in seconds to complete position transition
+        private float positionTransitionElapsed = 0f;
+        private Point positionStart = new Point(0, 0);
+        private bool positionTransitionActive = false;
         
         public Game1()
         {
@@ -294,76 +304,123 @@ namespace Gravity
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            // Eased zoom transition (ease-in-out cubic)
+            if (zoomTransitionActive)
+            {
+                zoomTransitionElapsed += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                var t = MathHelper.Clamp(zoomTransitionElapsed / zoomTransitionSpeed, 0f, 1f);
+                var eased = EaseInOutCubic(t);
+                Camera.Zoom = MathHelper.Lerp(zoomStart, targetZoom, eased);
+                if (t >= 1f)
+                {
+                    Camera.Zoom = targetZoom;
+                    zoomTransitionActive = false;
+                }
+            }
+
+            // Eased position transition (ease-in-out cubic)
+            if (positionTransitionActive)
+            {
+                positionTransitionElapsed += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                var t = MathHelper.Clamp(positionTransitionElapsed / positionTransitionSpeed, 0f, 1f);
+                var eased = EaseInOutCubic(t);
+                var newX = (int)MathHelper.Lerp(positionStart.X, targetPosition.X, eased);
+                var newY = (int)MathHelper.Lerp(positionStart.Y, targetPosition.Y, eased);
+                Camera.Position = new Point(newX, newY);
+                if (t >= 1f)
+                {
+                    Camera.Position = targetPosition;
+                    positionTransitionActive = false;
+                }
+            }
+
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
                 Camera.Position = new Point(Camera.Position.X, Camera.Position.Y + Camera.MovementSpeed);
+                targetPosition = Camera.Position;
+                positionTransitionActive = false;
             }
             if (Keyboard.GetState().IsKeyDown(Keys.S))
             {
                 Camera.Position = new Point(Camera.Position.X, Camera.Position.Y - Camera.MovementSpeed);
+                targetPosition = Camera.Position;
+                positionTransitionActive = false;
             }
             if (Keyboard.GetState().IsKeyDown(Keys.A))
             {
                 Camera.Position = new Point(Camera.Position.X + Camera.MovementSpeed, Camera.Position.Y);
+                targetPosition = Camera.Position;
+                positionTransitionActive = false;
             }
             if (Keyboard.GetState().IsKeyDown(Keys.D))
             {
                 Camera.Position = new Point(Camera.Position.X - Camera.MovementSpeed, Camera.Position.Y);
+                targetPosition = Camera.Position;
+                positionTransitionActive = false;
+            }
+
+            void handleSelectionChanged(string newSelection)
+            {
+                var oldSelection = Selection;
+                Selection = newSelection;
+                (Camera.Position, targetPosition) = GetCameraTransitionFromToForBodies(
+                    Bodies.Bodies.FirstOrDefault(temp => temp.Name == oldSelection), 
+                    Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection),
+                    Camera.Zoom,
+                    Camera.Position,
+                    PositionFactor,
+                    SunSizeFactor,
+                    PlanetSizeFactor,
+                    MoonSizeFactor,
+                    Graphics.PreferredBackBufferWidth, 
+                    Graphics.PreferredBackBufferHeight                        
+                    );
+                targetZoom = GetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? targetZoom;
+                // start eased zoom transition
+                zoomStart = Camera.Zoom;
+                zoomTransitionElapsed = 0f;
+                zoomTransitionActive = true;
+                // start eased position transition (Camera.Position was set to the initialCameraPosition by above)
+                positionStart = Camera.Position;
+                positionTransitionElapsed = 0f;
+                positionTransitionActive = true;
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.NumPad0))
             {
-                Selection = "Sol";
-                Camera.Position = new Point(0, 0);
-                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
+                handleSelectionChanged("Sol");
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad1))
             {
-                Selection = "Mercury";
-                Camera.Position = new Point(0, 0);
-                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
+                handleSelectionChanged("Mercury");
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad2))
             {
-                Selection = "Venus";
-                Camera.Position = new Point(0, 0);
-                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
+                handleSelectionChanged("Venus");
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad3))
             {
-                Selection = "Earth";
-                Camera.Position = new Point(0, 0);
-                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
+                handleSelectionChanged("Earth");
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad4))
             {
-                Selection = "Mars";
-                Camera.Position = new Point(0, 0);
-                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
+                handleSelectionChanged("Mars");
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad5))
             {
-                Selection = "Jupiter";
-                Camera.Position = new Point(0, 0);
-                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
+                handleSelectionChanged("Jupiter");
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad6))
             {
-                Selection = "Saturn";
-                Camera.Position = new Point(0, 0);
-                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
+                handleSelectionChanged("Saturn");
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad7))
             {
-                Selection = "Uranus";
-                Camera.Position = new Point(0, 0);
-                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
+                handleSelectionChanged("Uranus");
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad8))
             {
-                Selection = "Neptune";
-                Camera.Position = new Point(0, 0);
-                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
+                handleSelectionChanged("Neptune");
             }
 
             // Mouse wheel zoom
@@ -372,9 +429,17 @@ namespace Gravity
                 if (previousMouseWheel == int.MaxValue)
                     previousMouseWheel = mouseState.ScrollWheelValue;
                 if (mouseState.ScrollWheelValue > previousMouseWheel)
+                {
                     Camera.Zoom *= Camera.ZoomSpeed;
+                    targetZoom = Camera.Zoom;
+                    zoomTransitionActive = false;
+                }
                 if (mouseState.ScrollWheelValue < previousMouseWheel)
+                {
                     Camera.Zoom /= Camera.ZoomSpeed;
+                    targetZoom = Camera.Zoom;
+                    zoomTransitionActive = false;
+                }
                 previousMouseWheel = mouseState.ScrollWheelValue;
             }
 
@@ -508,18 +573,50 @@ namespace Gravity
         }
 
         // Helpers
-        private static float? SetCameraZoomForBody(Body? body)
+        static (Point CameraPosition, Point TargetPosition) GetCameraTransitionFromToForBodies(Body? oldBody, Body? newBody, float currentZoom, Point currentPosition, float origPositionFactor, float sunSizeFactor, float planetSizeFactor, float moonSizeFactor, int screenWidth, int screenHeight)
+        {
+            var initialCameraPosition = currentPosition;
+            var targetCameraPosition = new Point(0, 0);
+
+            if (oldBody != null && newBody != null)
+            {
+                // positionFactor maps world positions into screen-space units used by GetCenterPosition
+                var positionFactor = origPositionFactor / currentZoom;
+
+                // reference centers in screen-space (points)
+                var oldRefCenter = GetCenterPosition(oldBody, positionFactor);
+                var newRefCenter = GetCenterPosition(newBody, positionFactor);
+                
+                initialCameraPosition = new Point(
+                    newRefCenter.X - oldRefCenter.X + currentPosition.X,
+                    newRefCenter.Y - oldRefCenter.Y + currentPosition.Y
+                );
+
+                // After switching references, we want to smoothly go to (0,0) (centered on new body)
+                targetCameraPosition = new Point(0, 0);
+            }
+
+            return (initialCameraPosition, targetCameraPosition);
+        }
+        static float? GetCameraZoomForBody(Body? body)
         {
             var radialBody = body as RadialBody;
             if (radialBody != null)
             {
-                var solRadius = 696000000f;
+                var solRadius = 696000000;
                 var zoomRatio = solRadius / radialBody.Radius;
                 return (1f / 100000) * zoomRatio;
             }
             return null;
         }
-
+        static float EaseInOutCubic(float t)
+        {
+            t = MathHelper.Clamp(t, 0f, 1f);
+            if (t < 0.5f)
+                return 4f * t * t * t;
+            var f = -2f * t + 2f;
+            return 1f - (f * f * f) / 2f;
+        }
         static int GetRadius(RadialBody? body, float sizeFactor)
         {
             if (body == null)
