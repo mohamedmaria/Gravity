@@ -92,13 +92,15 @@ namespace Gravity
                 BodyType.Sun,
                 "Sol",
                 (float)(1.9885 * Math.Pow(10, 33)),
-                696000000
+                696000000,
+                System.Drawing.Color.FromArgb(255, 200, 0)
                 );
             var mercury = new RadialBody(
                 BodyType.Planet,
                 "Mercury",
                 (float)(3.302 * Math.Pow(10, 26)),
                 2439700,
+                System.Drawing.Color.FromArgb(180, 150, 130),
                 sol,
                 57910000000,
                 0
@@ -108,6 +110,7 @@ namespace Gravity
                 "Venus",
                 (float)(4.868 * Math.Pow(10, 27)),
                 6051800,
+                System.Drawing.Color.FromArgb(255, 180, 100),
                 sol,
                 108210000000,
                 0
@@ -117,6 +120,7 @@ namespace Gravity
                 "Earth",
                 (float)(5.972 * Math.Pow(10, 27)),
                 6371000,
+                System.Drawing.Color.FromArgb(100, 150, 200),
                 sol,
                 149597870000,
                 0
@@ -126,6 +130,7 @@ namespace Gravity
                 "Luna",
                 (float)(7.35 * Math.Pow(10, 22)),
                 1737400,
+                System.Drawing.Color.FromArgb(200, 200, 200),
                 earth,
                 385000600,
                 0
@@ -135,6 +140,7 @@ namespace Gravity
                 "Mars",
                 (float)(6.4191 * Math.Pow(10, 26)),
                 3396200,
+                System.Drawing.Color.FromArgb(200, 100, 50),
                 sol,
                 227940000000,
                 0
@@ -144,6 +150,7 @@ namespace Gravity
                 "Jupiter",
                 (float)(1.8987 * Math.Pow(10, 30)),
                 71492000,
+                System.Drawing.Color.FromArgb(200, 150, 100),
                 sol,
                 778410000000,
                 0
@@ -153,6 +160,7 @@ namespace Gravity
                 "Saturn",
                 (float)(5.6851 * Math.Pow(10, 29)),
                 60268000,
+                System.Drawing.Color.FromArgb(220, 190, 140),
                 sol,
                 1430000000000,
                 0
@@ -162,6 +170,7 @@ namespace Gravity
                 "Uranus",
                 (float)(8.6849 * Math.Pow(10, 28)),
                 25559000,
+                System.Drawing.Color.FromArgb(100, 180, 220),
                 sol,
                 2870000000000,
                 0
@@ -171,6 +180,7 @@ namespace Gravity
                 "Neptune",
                 (float)(1.0244 * Math.Pow(10, 29)),
                 24764000,
+                System.Drawing.Color.FromArgb(50, 100, 200),
                 sol,
                 4500000000000,
                 0
@@ -216,7 +226,7 @@ namespace Gravity
             MainFont = Content.Load<SpriteFont>("File");
 
             // Load textures
-            Texture2D createCircleText(int diameter)
+            Texture2D createPlanetTexture(int diameter, Body body)
             {
                 var texture = new Texture2D(GraphicsDevice, diameter, diameter);
                 var colorData = new Color[diameter * diameter];
@@ -232,7 +242,15 @@ namespace Gravity
                         var pos = new Vector2(x - radius, y - radius);
                         if (pos.LengthSquared() <= radiussq)
                         {
-                            colorData[index] = Color.White;
+                            // Add some procedural variation
+                            var noise = SimplexNoise(x, y, body.Name.GetHashCode()) * 0.3f;
+
+                            colorData[index] = new Color(
+                                (int)Math.Clamp(body.BaseColor.R + noise * 30, 0, 255),
+                                (int)Math.Clamp(body.BaseColor.G + noise * 30, 0, 255),
+                                (int)Math.Clamp(body.BaseColor.B + noise * 30, 0, 255),
+                                255
+                            );
                         }
                         else
                         {
@@ -244,10 +262,17 @@ namespace Gravity
                 texture.SetData(colorData);
                 return texture;
             }
+
             foreach (var body in Bodies.Bodies)
             {
-                BodyTextures[body] = createCircleText(1000);
+                BodyTextures[body] = createPlanetTexture(1000, body);
             }
+        }
+
+        private static float SimplexNoise(int x, int y, int seed)
+        {
+            var n = (float)Math.Sin((x + seed) * 12.9898f + (y + seed) * 78.233f) * 43758.5453f;
+            return n - (float)Math.Floor(n);
         }
 
         protected override void Update(GameTime gameTime)
@@ -430,7 +455,7 @@ namespace Gravity
                     SpriteBatch.Draw(
                         BodyTextures[body],
                         new Rectangle(relativePosition, new Point(radius * 2, radius * 2)),
-                        Color.Brown
+                        Color.White
                         );
 
                     if (Camera.Zoom > (1f / 10000) || radialBody.BodyType != BodyType.Moon)

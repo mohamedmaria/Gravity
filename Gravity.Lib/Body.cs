@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.Numerics;
+using System.Drawing;
 
 namespace Gravity.Lib
 {
@@ -78,6 +79,14 @@ namespace Gravity.Lib
             get;
             set;
         }
+        /// <summary>
+        /// The typical color fo the body
+        /// </summary>
+        public Color BaseColor
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Sets the velocity to ensure stable orbit around parent
@@ -106,6 +115,7 @@ namespace Gravity.Lib
             Velocity = new Vector2(0, 0);
             Acceleration = new Vector2(0, 0);
             Jerk = new Vector2(0, 0);
+            BaseColor = Color.White;
         }
     }
 }

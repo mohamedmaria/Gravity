@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.Numerics;
+using System.Drawing;
 
 namespace Gravity.Lib
 {
@@ -25,7 +26,7 @@ namespace Gravity.Lib
         /// <summary>
         /// Constructor
         /// </summary>
-        public RadialBody(BodyType bodyType, string name, float mass, float radius)
+        public RadialBody(BodyType bodyType, string name, float mass, float radius, Color baseColor)
         {
             BodyType = bodyType;
             Name = name;
@@ -36,11 +37,12 @@ namespace Gravity.Lib
             Velocity = new Vector2(0, 0);
             Acceleration = new Vector2(0, 0);
             Jerk = new Vector2(0, 0);
+            BaseColor = baseColor;
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        public RadialBody(BodyType bodyType, string name, float mass, float radius, Body parent, float orbitLength, float orbitDegrees) : this(bodyType, name, mass, radius)
+        public RadialBody(BodyType bodyType, string name, float mass, float radius, Color baseColor, Body parent, float orbitLength, float orbitDegrees) : this(bodyType, name, mass, radius, baseColor)
         {
             InitBasedOnParent(parent, orbitLength, orbitDegrees);
         }
