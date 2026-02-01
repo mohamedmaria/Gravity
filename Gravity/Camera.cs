@@ -38,7 +38,7 @@ namespace Gravity
         public Camera()
         {
             Position = new Point(0, 0);
-            Zoom = 7f / 10000;
+            Zoom = 1f / 100000;
         }
     }
 }

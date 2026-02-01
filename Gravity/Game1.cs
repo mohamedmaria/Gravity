@@ -433,7 +433,10 @@ namespace Gravity
                         Color.Brown
                         );
 
-                    SpriteBatch.DrawString(MainFont, radialBody.Name, new Vector2(relativePosition.X, relativePosition.Y), Color.White);
+                    if (Camera.Zoom > (1f / 10000) || radialBody.BodyType != BodyType.Moon)
+                    {
+                        SpriteBatch.DrawString(MainFont, radialBody.Name, new Vector2(relativePosition.X, relativePosition.Y), Color.White);
+                    }
                 }
             }
 
