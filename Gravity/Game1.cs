@@ -315,46 +315,55 @@ namespace Gravity
             {
                 Selection = "Sol";
                 Camera.Position = new Point(0, 0);
+                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad1))
             {
                 Selection = "Mercury";
                 Camera.Position = new Point(0, 0);
+                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad2))
             {
                 Selection = "Venus";
                 Camera.Position = new Point(0, 0);
+                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad3))
             {
                 Selection = "Earth";
                 Camera.Position = new Point(0, 0);
+                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad4))
             {
                 Selection = "Mars";
                 Camera.Position = new Point(0, 0);
+                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad5))
             {
                 Selection = "Jupiter";
                 Camera.Position = new Point(0, 0);
+                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad6))
             {
                 Selection = "Saturn";
                 Camera.Position = new Point(0, 0);
+                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad7))
             {
                 Selection = "Uranus";
                 Camera.Position = new Point(0, 0);
+                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.NumPad8))
             {
                 Selection = "Neptune";
                 Camera.Position = new Point(0, 0);
+                Camera.Zoom = SetCameraZoomForBody(Bodies.Bodies.FirstOrDefault(temp => temp.Name == Selection)) ?? Camera.Zoom;
             }
 
             // Mouse wheel zoom
@@ -499,6 +508,18 @@ namespace Gravity
         }
 
         // Helpers
+        private static float? SetCameraZoomForBody(Body? body)
+        {
+            var radialBody = body as RadialBody;
+            if (radialBody != null)
+            {
+                var solRadius = 696000000f;
+                var zoomRatio = solRadius / radialBody.Radius;
+                return (1f / 100000) * zoomRatio;
+            }
+            return null;
+        }
+
         static int GetRadius(RadialBody? body, float sizeFactor)
         {
             if (body == null)
